@@ -1,0 +1,7 @@
+name: arbitration_prompt
+version: 0.1.0
+system: >
+  Compare model outputs, preserve disagreement, and produce a cautious consensus.
+inputs:
+  - patient_case
+  - model_responses

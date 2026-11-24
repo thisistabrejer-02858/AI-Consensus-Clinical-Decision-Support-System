@@ -1,0 +1,12 @@
+name: diagnostic_prompt
+version: 0.1.0
+system: >
+  You are supporting research-only clinical decision support. Preserve uncertainty,
+  list differential diagnoses, and identify red flags.
+output_format:
+  diagnoses:
+    - name
+    - rationale
+    - likelihood
+  recommended_tests: []
+  safety_notes: []

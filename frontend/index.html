@@ -1,0 +1,488 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinical AI Support</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --navy: #17365d;
+      --blue: #245ca6;
+      --text: #243247;
+      --muted: #64748b;
+      --border: #dce3ec;
+      --background: #f3f6fa;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    header {
+      background: var(--navy);
+      color: white;
+      padding: 22px max(20px, calc((100% - 1100px) / 2));
+    }
+
+    header h1 { margin: 0 0 7px; font-size: 25px; }
+    header p { margin: 0; color: #d8e5f5; font-size: 14px; }
+
+    main {
+      max-width: 1100px;
+      margin: 26px auto;
+      padding: 0 18px;
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px;
+      box-shadow: 0 3px 12px #172b4d0b;
+      min-width: 0;
+    }
+
+    h2 { margin: 0 0 18px; font-size: 19px; }
+    h3 { font-size: 14px; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin: 14px 0 6px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font: inherit;
+      font-size: 14px;
+      background: white;
+    }
+
+    textarea { min-height: 68px; resize: vertical; }
+    input:focus, textarea:focus {
+      outline: 2px solid #9dbde8;
+      outline-offset: 1px;
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    button {
+      margin-top: 18px;
+      padding: 12px 16px;
+      width: 100%;
+      border: 0;
+      border-radius: 6px;
+      background: var(--blue);
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:disabled { opacity: 0.6; cursor: wait; }
+    .hint, .muted {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .notice {
+      background: #fff7df;
+      border: 1px solid #f1d48b;
+      color: #755315;
+      padding: 11px;
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .status { font-size: 13px; margin: 12px 0; white-space: pre-wrap; }
+    .result-card {
+      border: 1px solid #e1e7ef;
+      border-radius: 8px;
+      padding: 14px;
+      margin: 12px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .result-card h3 { margin: 0 0 8px; }
+    .result-card p { margin: 6px 0; font-size: 14px; line-height: 1.5; }
+    .metric { font-size: 27px !important; font-weight: bold; color: var(--blue); }
+    ul { padding-left: 20px; margin-bottom: 0; }
+    li { margin: 7px 0; font-size: 14px; line-height: 1.5; }
+    .empty { color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+    .summary {
+      border-top: 4px solid var(--blue);
+      background: #f7faff;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      background: #e7edf5;
+      color: #334155;
+    }
+
+    .badge.warning { background: #fff0d4; color: #80520b; }
+    .badge.good { background: #e3f5e9; color: #21683a; }
+    .candidate {
+      padding: 10px 0;
+      border-top: 1px solid #e7edf3;
+    }
+    .candidate:first-child { border-top: 0; }
+    .candidate-name { font-weight: bold; font-size: 14px; }
+    .support { color: var(--muted); font-size: 12px; margin-top: 5px; }
+    .bar {
+      height: 6px;
+      margin-top: 8px;
+      background: #e8edf4;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .bar-fill { height: 100%; background: var(--blue); }
+    .disclaimer {
+      margin-top: 16px;
+      padding: 12px;
+      border: 1px solid #f1d48b;
+      border-radius: 7px;
+      background: #fffaf0;
+      color: #755315;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 760px) {
+      main { grid-template-columns: 1fr; margin-top: 16px; }
+      header h1 { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Clinical AI Support</h1>
+    <p>AI Consensus-Based Clinical Decision Support System · Research Prototype</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Synthetic Patient Case</h2>
+      <div class="notice">
+        Educational research prototype. Use fictional test data only; never enter
+        identifiable patient information. This tool is not for real medical decisions.
+      </div>
+
+      <form id="caseForm">
+        <div class="row">
+          <div>
+            <label for="age">Age</label>
+            <input id="age" type="number" min="0" max="120" value="35" required>
+          </div>
+          <div>
+            <label for="gender">Gender</label>
+            <input id="gender" value="female" required>
+          </div>
+        </div>
+
+        <label for="symptoms">Symptoms (comma-separated)</label>
+        <textarea id="symptoms" required>fever, cough</textarea>
+
+        <label for="duration">Symptom duration</label>
+        <input id="duration" placeholder="e.g. 3 days">
+
+        <label for="history">Medical history (comma-separated)</label>
+        <input id="history" placeholder="e.g. asthma, hypertension">
+
+        <label for="medications">Current medications (comma-separated)</label>
+        <input id="medications" placeholder="e.g. medication A">
+
+        <label for="allergies">Allergies (comma-separated)</label>
+        <input id="allergies" placeholder="e.g. none known, if confirmed">
+
+        <label for="tests">Available test results (comma-separated)</label>
+        <textarea id="tests" placeholder="e.g. synthetic test result"></textarea>
+
+        <button id="submitButton" type="submit">Analyze Synthetic Case</button>
+        <p class="hint">
+          Uses the backend's currently configured DIAGNOSIS_MODE.
+        </p>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Analysis Results</h2>
+      <p id="status" class="status" role="status" aria-live="polite">
+        Enter a synthetic case and select Analyze to view the results.
+      </p>
+      <div id="results" aria-live="polite">
+        <p class="empty">
+          The leading candidate, agreement, alternatives, and recommendations
+          will appear here after analysis.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("caseForm");
+    const button = document.getElementById("submitButton");
+    const statusBox = document.getElementById("status");
+    const resultsBox = document.getElementById("results");
+
+    function splitList(value) {
+      return value.split(",").map(item => item.trim()).filter(Boolean);
+    }
+
+    function addText(parent, tag, text) {
+      const element = document.createElement(tag);
+      element.textContent = text ?? "Not available";
+      parent.appendChild(element);
+      return element;
+    }
+
+    function addCard(title, content, className = "") {
+      const card = document.createElement("div");
+      card.className = `result-card ${className}`.trim();
+      addText(card, "h3", title);
+
+      if (Array.isArray(content)) {
+        if (content.length === 0) {
+          addText(card, "p", "No items returned.");
+        } else {
+          const list = document.createElement("ul");
+          content.forEach(item => addText(list, "li", item));
+          card.appendChild(list);
+        }
+      } else {
+        addText(card, "p", content);
+      }
+
+      resultsBox.appendChild(card);
+      return card;
+    }
+
+    function percentage(value) {
+      const number = Number(value);
+      return Number.isFinite(number) && number >= 0 && number <= 1
+        ? `${(number * 100).toFixed(1)}%`
+        : "Not available";
+    }
+
+    function showResults(data) {
+      resultsBox.replaceChildren();
+
+      const hasDiagnosis = Boolean(data.primary_diagnosis);
+      const summary = document.createElement("div");
+      summary.className = "result-card summary";
+      addText(summary, "h3", "Leading candidate");
+      addText(
+        summary,
+        "p",
+       data.primary_diagnosis ||
+  (data.disagreement_detected
+    ? "No unique consensus — review the candidate diagnoses below."
+    : "No usable diagnosis returned.")
+      ).style.fontWeight = "bold";
+
+      const agreement = document.createElement("p");
+      agreement.className = "metric";
+      agreement.textContent = percentage(data.agreement_score);
+      summary.appendChild(agreement);
+
+      addText(
+        summary,
+        "p",
+        "Agreement reflects response alignment, not the probability that a diagnosis is correct."
+      ).className = "muted";
+
+      const badge = document.createElement("span");
+      badge.className = "badge " +
+        (data.disagreement_detected ? "warning" : "good");
+      badge.textContent = data.disagreement_detected
+        ? "Disagreement detected"
+        : "No disagreement reported";
+      summary.appendChild(badge);
+      resultsBox.appendChild(summary);
+
+      const metrics = document.createElement("div");
+      metrics.className = "result-card";
+      addText(metrics, "h3", "Consensus score");
+      addText(metrics, "p", percentage(data.consensus_score)).className = "metric";
+      addText(
+        metrics,
+        "p",
+        "This is the score returned by the backend; it is not a measure of clinical accuracy."
+      ).className = "muted";
+      resultsBox.appendChild(metrics);
+
+      const candidatesCard = document.createElement("div");
+      candidatesCard.className = "result-card";
+      addText(candidatesCard, "h3", "Candidate comparison");
+
+      const candidates = Array.isArray(data.candidates) ? data.candidates : [];
+
+      if (candidates.length === 0) {
+        addText(candidatesCard, "p", "No candidate details returned.");
+      } else {
+        candidates.forEach(candidate => {
+          const item = document.createElement("div");
+          item.className = "candidate";
+
+          addText(
+            item,
+            "div",
+            candidate.diagnosis || "Unnamed candidate"
+          ).className = "candidate-name";
+
+          const supportingModels = Array.isArray(candidate.supporting_models)
+            ? candidate.supporting_models
+            : [];
+          addText(
+            item,
+            "div",
+            `Support: ${Number(candidate.support_count) || 0} model(s)`
+          ).className = "support";
+
+          addText(
+            item,
+            "div",
+            `Supporting models: ${supportingModels.join(", ") || "Not listed"}`
+          ).className = "support";
+
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          bar.setAttribute("aria-label", "Model support count");
+
+          const fill = document.createElement("div");
+          fill.className = "bar-fill";
+          const count = Math.max(0, Number(candidate.support_count) || 0);
+          const maxCount = Math.max(
+            1,
+            ...candidates.map(c => Math.max(0, Number(c.support_count) || 0))
+          );
+          fill.style.width = `${Math.min(100, count / maxCount * 100)}%`;
+          bar.appendChild(fill);
+          item.appendChild(bar);
+          candidatesCard.appendChild(item);
+        });
+      }
+      resultsBox.appendChild(candidatesCard);
+
+      addCard(
+        "Disagreement details",
+        data.disagreement_detected
+          ? (data.disagreement_summary || "Providers returned differing candidates.")
+          : (data.disagreement_summary || "No disagreement was reported by the backend.")
+      );
+
+      addCard(
+        "Recommended tests / information",
+        Array.isArray(data.recommended_tests) ? data.recommended_tests : []
+      );
+
+      addCard(
+        "Explanation",
+        data.explanation || "No explanation returned."
+      );
+
+      const disclaimer = document.createElement("div");
+      disclaimer.className = "disclaimer";
+      disclaimer.textContent =
+        "Research decision-support output only. This is not a confirmed diagnosis " +
+        "or a substitute for professional clinical assessment. Mock results are " +
+        "synthetic software-test outputs and do not demonstrate clinical accuracy.";
+      resultsBox.appendChild(disclaimer);
+
+      if (!hasDiagnosis) {
+        statusBox.textContent =
+          "Request completed, but the backend did not return a usable leading candidate.";
+      }
+    }
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      button.disabled = true;
+      statusBox.textContent = "Submitting synthetic case...";
+      resultsBox.replaceChildren();
+
+      const age = Number(document.getElementById("age").value);
+      const symptoms = splitList(document.getElementById("symptoms").value);
+      const gender = document.getElementById("gender").value.trim();
+
+      if (
+        !Number.isInteger(age) ||
+        age < 0 ||
+        age > 120 ||
+        symptoms.length === 0 ||
+        !gender
+      ) {
+        statusBox.textContent =
+          "Please enter a valid age, gender, and at least one symptom.";
+        button.disabled = false;
+        return;
+      }
+
+      const payload = {
+        age,
+        gender,
+        symptoms,
+        symptom_duration:
+          document.getElementById("duration").value.trim() || null,
+        medical_history: splitList(document.getElementById("history").value),
+        current_medications: splitList(document.getElementById("medications").value),
+        allergies: splitList(document.getElementById("allergies").value),
+        test_results: splitList(document.getElementById("tests").value)
+      };
+
+      try {
+        const response = await fetch("/diagnosis/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.detail
+              ? JSON.stringify(data.detail)
+              : `Request failed with HTTP ${response.status}`
+          );
+        }
+
+        statusBox.textContent = data.primary_diagnosis
+  ? "Analysis completed. Review the candidate comparison and any disagreement below."
+  : data.disagreement_detected
+    ? "Analysis completed, but providers did not reach a unique consensus. Review the candidates below."
+    : "Analysis completed, but no usable diagnosis was returned.";
+        showResults(data);
+      } catch (error) {
+        statusBox.textContent =
+          "Could not get a result. Confirm that the FastAPI server is running. " +
+          "Details: " + error.message;
+        resultsBox.replaceChildren();
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

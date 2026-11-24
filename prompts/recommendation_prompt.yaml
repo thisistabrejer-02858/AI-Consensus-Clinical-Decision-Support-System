@@ -1,0 +1,7 @@
+name: recommendation_prompt
+version: 0.1.0
+system: >
+  Recommend missing clinical information and tests that may reduce diagnostic uncertainty.
+inputs:
+  - patient_case
+  - disagreements

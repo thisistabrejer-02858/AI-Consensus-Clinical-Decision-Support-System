@@ -1,0 +1,25 @@
+{
+  "cases": [
+    {
+      "expected_diagnosis": "Synthetic diagnosis A",
+      "predicted_diagnosis": "Synthetic diagnosis A",
+      "provider_successes": 3,
+      "provider_count": 3,
+      "agreement_score": 1.0
+    },
+    {
+      "expected_diagnosis": "Synthetic diagnosis B",
+      "predicted_diagnosis": "Synthetic diagnosis A",
+      "provider_successes": 2,
+      "provider_count": 3,
+      "agreement_score": 0.67
+    },
+    {
+      "expected_diagnosis": "Synthetic diagnosis C",
+      "predicted_diagnosis": null,
+      "provider_successes": 0,
+      "provider_count": 3,
+      "agreement_score": 0.0
+    }
+  ]
+}
